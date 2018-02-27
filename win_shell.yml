@@ -1,6 +1,0 @@
----
-# Commande PowerShell
-- hosts: all
-  tasks:
-    - name: Commande Echo PowerShell
-      win_shell: echo "Ansible is working"
