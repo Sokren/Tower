@@ -2,35 +2,20 @@
 # Install Docker on RHEL 7
 - hosts: all
   vars:
-    user: ""
-    passwd: ""
-    apps_state: ""
-    apps: ""
-    dockerurl: "" #specify your URL for Docker EE
-    dockerosversion: "7" # for RHEL 7
+    #Find your Docker EE repo URL
+    #To install Docker EE, you will need the URL of the Docker EE repository associated with your trial or subscription:
+    #1. Go to https://store.docker.com/my-content. All of your subscriptions and trials are listed.
+    #2. Click the Setup button for Docker Enterprise Edition for Red Hat Enterprise Linux.
+    #3. Copy the URL from Copy and paste this URL to dockerurl
+    dockerurl: "" 
+    #centos, rhel, oraclelinux, for Ubuntu and SLES see https://docs.docker.com/install/linux/docker-ee/ubuntu/#set-up-the-repository or https://docs.docker.com/install/linux/docker-ee/suse/#set-up-the-repository
+    dockeros: "rhel" 
+    dockerosversion: "7"
 
 # Install Docker EE  
   tasks:
-    - name: Register an user and auto-subscribe to available content.
-      redhat_subscription:
-        state: present
-        username: "{{ user }}"
-        password: "{{ passwd }}"
-        autosubscribe: true
-        
-    - name: Disable all RHSM repositories
-      rhsm_repository:
-        name: '*'
-        state: disabled
-    
-    - name: Enable a RHSM repository RHEL 7
-      rhsm_repository:
-        name: rhel-7-server-rpms
-    
-    - name: Enable a RHSM repository RHEL 7 extras
-      rhsm_repository:
-        name: rhel-7-server-extras-rpms
-    
+#Need repos rhel-7-server-rpms & rhel-7-server-extras-rpms
+
     - name: Install required packages "{{ ansible_hostname }}"
       yum:
         name: "{{ item }}"
@@ -39,14 +24,17 @@
         - yum-utils
         - device-mapper-persistent-data
         - lvm2
-        
-    - name: Add repository
-      yum_repository:
-        name: docker-ee
-        description: Docker EE Repos
-        baseurl: "{{ dockerurl }}"
-        
-    - name: Install Docker EE "{{ ansible_hostname }}"
+
+    - name: Add vars dockerurl to yum
+      command: sh -c 'echo {{ dockerurl }}/rhel > /etc/yum/vars/dockerurl'
+      
+    - name: Add vars dockerversion to yum
+      command: sh -c 'echo {{ dockerosversion }} > /etc/yum/vars/dockerosversion'
+
+    - name: Add docker-ee repositories
+      command: yum-config-manager --add-repo {{ dockerurl }}/{{ dockeros }}/docker-ee.repo
+    
+    - name: Install Docker EE on "{{ ansible_hostname }}"
       yum:
         name: "docker-ee"
         state: present
@@ -60,10 +48,3 @@
     - name: Make sure docker is running
       systemd: state=started name=docker
       
-    - lineinfile:
-        path: /etc/yum/vars/dockerurl
-        line: '{{ dockerurl }}'
-    
-    - lineinfile:
-        path: /etc/yum/vars/dockerosversion
-        line: '{{ dockerosversion }}'
