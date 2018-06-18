@@ -23,3 +23,5 @@
     - name: enable the needed rhel repositories
       command: subscription-manager repos --enable={{ item }}
       with_items: "{{ repo }}"
+        #- rhel-7-server-rpms # For manual repo list
+        #- rhel-7-server-extras-rpms
