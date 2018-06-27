@@ -74,6 +74,19 @@
         - 12386/tcp
         - 12387/tcp
     
+    # Open port on the firewall for UCP 3.0 Workers
+#    - name: Open ports firewall for Workers
+#      command: firewall-cmd --add-port="{{ item }}" --permanent
+#      with_items:
+#        - 179/tcp
+#        - 4789/udp
+#        - 6444/tcp
+#        - 7946/udp
+#        - 7946/tcp
+#        - 10250/tcp
+#        - 12376/tcp
+#        - 12378/tcp
+    
     - name: Restart Firewalld
       systemd:
         state: restarted
